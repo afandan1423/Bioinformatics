@@ -58,28 +58,29 @@ for header, seq in read_fasta(genome_filename):
             seq_copy = generate_nucleotids(len(seq))
             name = 'Generated'
         Length, Amount = [], []
+        sum = 0
         for shift in range(3):
-            checkmark = None
             for start,stop in orf(seq_copy, shift):
                 if Length.count(stop - start + 1) == 0:
                     Length.append(stop - start + 1)
                     Amount.append(1)
+                    sum += 1
                 else:
                     Amount[Length.index(stop - start + 1)] += 1
-                checkmark = 1
+                    sum += 1
                 translate_preparation = [seq_copy[i:i+3] for i in range(start, stop, 3)]
                 translate = map(lambda inf: codon_dictionary.get(inf, '*'), translate_preparation)
                 dna = ''.join(translate)
         seq_copy = swap_sequence(seq_copy)
         for shift in range(3):
-            checkmark = None
             for start,stop in orf(seq_copy, shift):
                 if Length.count(stop - start + 1) == 0:
                     Length.append(stop - start + 1)
                     Amount.append(1)
+                    sum += 1
                 else:
                     Amount[Length.index(stop - start + 1)] += 1
-                checkmark = 1
+                    sum += 1
                 translate_preparation = [seq_copy[i:i+3] for i in range(start, stop, 3)]
                 translate = map(lambda inf: codon_dictionary.get(inf, '*'), translate_preparation)
                 dna = ''.join(translate)
@@ -89,6 +90,6 @@ for header, seq in read_fasta(genome_filename):
         plt.xlabel('Длины рамок')
         plt.ylabel('Кол-во рамок определённой длины')
         plt.xlim([0, 1500])
-        print(name + ' min = ' + str(min(Length)) + '; max = ' + str(max(Length)))
+        print(name + ' min = ' + str(min(Length)) + '; max = ' + str(max(Length)) + '; sum = ' + str(sum))
         Length, Amount = [], []
 plt.show()
