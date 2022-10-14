@@ -58,6 +58,8 @@ for header, seq in read_fasta(genome_filename):
             seq_copy = generate_nucleotids(len(seq))
             name = 'Generated'
         Length, Amount = [], []
+        Amino = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', '*']
+        Nucl, NuclAmou, AminoAmou = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], [0] * len(Amino)
         sum = 0
         for shift in range(3):
             for start,stop in orf(seq_copy, shift):
@@ -68,7 +70,16 @@ for header, seq in read_fasta(genome_filename):
                 else:
                     Amount[Length.index(stop - start + 1)] += 1
                     sum += 1
-                translate_preparation = [seq_copy[i:i+3] for i in range(start, stop, 3)]
+                translate_preparation = []
+                for i in range(start, stop, 3):
+                    translate_preparation.append(seq_copy[i:i+3])
+                    Shortcut = Amino.index(codon_dictionary.get(seq_copy[i:i+3]))
+                    AminoAmou[Shortcut] += 1
+                    if Nucl[Shortcut].count(seq_copy[i:i+3]) == 0:
+                        Nucl[Shortcut].append(seq_copy[i:i+3])
+                        NuclAmou[Shortcut].append(1)
+                    else:
+                        NuclAmou[Shortcut][Nucl[Shortcut].index(seq_copy[i:i+3])] += 1
                 translate = map(lambda inf: codon_dictionary.get(inf, '*'), translate_preparation)
                 dna = ''.join(translate)
         seq_copy = swap_sequence(seq_copy)
@@ -81,15 +92,26 @@ for header, seq in read_fasta(genome_filename):
                 else:
                     Amount[Length.index(stop - start + 1)] += 1
                     sum += 1
-                translate_preparation = [seq_copy[i:i+3] for i in range(start, stop, 3)]
+                translate_preparation = []
+                for i in range(start, stop, 3):
+                    translate_preparation.append(seq_copy[i:i+3])
+                    Shortcut = Amino.index(codon_dictionary.get(seq_copy[i:i+3]))
+                    AminoAmou[Shortcut] += 1
+                    if Nucl[Shortcut].count(seq_copy[i:i+3]) == 0:
+                        Nucl[Shortcut].append(seq_copy[i:i+3])
+                        NuclAmou[Shortcut].append(1)
+                    else:
+                        NuclAmou[Shortcut][Nucl[Shortcut].index(seq_copy[i:i+3])] += 1
                 translate = map(lambda inf: codon_dictionary.get(inf, '*'), translate_preparation)
                 dna = ''.join(translate)
-        plt.bar(Length, Amount, align = 'edge', width = 4.5 - (both * 3), label = name)
-        plt.legend()
-        plt.title('Анализ длин рамок считывания')
-        plt.xlabel('Длины рамок')
-        plt.ylabel('Кол-во рамок определённой длины')
-        plt.xlim([0, 1500])
-        print(name + ' min = ' + str(min(Length)) + '; max = ' + str(max(Length)) + '; sum = ' + str(sum))
-        Length, Amount = [], []
-plt.show()
+        plt.bar(Amino, AminoAmou)
+        plt.title('Кол-во раз аминокислоты были задествованы в ' + str(name))
+        plt.xlabel('Названия аминокислот')
+        plt.ylabel('Их кол-во появлений')
+        plt.show()
+        for number in range(len(Amino)):
+            plt.bar(Nucl[number], NuclAmou[number])
+            plt.title('Кол-во ра изпользования нуклеоидов ' + Amino[number])
+            plt.xlabel('Названия нуклеоидов')
+            plt.ylabel('Их кол-во раз использований')
+            plt.show()
